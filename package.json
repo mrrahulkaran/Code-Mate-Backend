@@ -1,0 +1,23 @@
+{
+  "name": "dtinder-backend",
+  "version": "1.0.0",
+  "description": "tinder for developer",
+  "main": "index.js",
+  "scripts": {
+    
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js"
+    
+  },
+  "keywords": [
+    "node",
+    "js",
+    "javascript"
+  ],
+  "author": "RahulKaran",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1",
+    "nodemon": "^3.1.7"
+  }
+}
