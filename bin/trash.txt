@@ -1,0 +1,11 @@
+app.get("/home", function (req, res) {
+  res.send("welcome home");
+});
+
+app.get("/data/xyz", function (req, res) {
+  res.send("no data right now");
+});
+
+app.get("/", function (req, res) {
+  res.send("Hello World");
+});
