@@ -1,10 +1,23 @@
 const express = require("express");
 const app = express();
 
-// user authentication-----
+// user authentication-----and--- Admin authentication
 
-app.use("/user", function (error, req, res, next) {
-  res.send("in progress");
+const { authUser, authAdmine } = require("./Middelwares/auth");
+
+app.use("/admin", authAdmine, function (req, res, next) {
+  next();
+});
+app.use("/admin/getAllUser", authAdmine, function (req, res) {
+  res.send("All user data send");
+});
+
+app.use("/user", authUser, function (req, res, next) {
+  next();
+});
+
+app.use("/user/data", function (req, res, next) {
+  res.send("user data send");
 });
 
 app.listen(3000, () => {

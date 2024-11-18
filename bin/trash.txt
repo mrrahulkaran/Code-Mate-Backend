@@ -66,4 +66,30 @@ app.get("/user/:userid", function (req, res) {
   res.send({ firstname: "akshay", lastname: "karan" });
 });
 
+-----------Route handeleing---------
 
+app.use("/user" , rh1, rh2, rh3, rh4)
+
+app.use(
+  "/user",
+  function (req, res, next) {
+    // res.send("response 1");
+    console.log("1st route handeler");
+    next();
+  },
+  function (req, res, next) {
+    // res.send("response 2");
+    console.log("2nd route handeler");
+    next();
+  },
+  [function (req, res, next) {
+    // res.send("response 3");
+    console.log("3rd route handeler");
+    next();
+  },
+  function (req, res, next) {
+    console.log("4th route handeler");
+    // next();
+    // res.send("response 4");
+  }]
+);
