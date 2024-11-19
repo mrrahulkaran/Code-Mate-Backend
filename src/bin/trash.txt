@@ -114,3 +114,29 @@ app.use("/user", authUser, function (req, res, next) {
 app.use("/user/data", function (req, res, next) {
   res.send("user data send");
 });
+
+
+------------------------------------------------------------
+
+
+app.use("/getUserData", (req, res, next) => {
+  throw new error("xcscsdsf");
+});
+
+//------- Error handeling using try and cathch block
+
+app.use("/getUserData", (req, res, next) => {
+  try {
+    throw new error("xcscsdsf");
+  } catch {
+    res.status(500).send("Some error auccured ");
+  }
+});
+
+//------WildcardErrorHandeling
+
+app.use("/", (err, req, res, next) => {
+  if (err) {
+    res.status(500).send("Something went wrong");
+  }
+});
