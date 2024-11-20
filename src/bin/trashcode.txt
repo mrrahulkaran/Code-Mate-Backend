@@ -140,3 +140,52 @@ app.use("/", (err, req, res, next) => {
     res.status(500).send("Something went wrong");
   }
 });
+
+------------mongoosee model User ----------------
+{
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      trim: true,
+    },
+    emailId: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    Password: {
+      type: String,
+      required: true,
+      minLength: 8,
+    },
+
+    age: {
+      type: Number,
+      min: 16,
+    },
+    gender: {
+      type: String,
+      validate(value) {
+        if (!["male", "female", "other"].includes(value)) {
+          throw new Error("gender data is not valid");
+        }
+      },
+    },
+    photoUrl: {
+      type: String,
+      default:
+        "https://cdn2.iconfinder.com/data/icons/business-hr-and-recruitment/100/account_blank_face_dummy_human_mannequin_profile_user_-512.png",
+    },
+
+    about: {
+      type: String,
+      default: "hi there",
+    },
+    skills: {
+      type: [String],
+    },
+  },
