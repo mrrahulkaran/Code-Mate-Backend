@@ -35,7 +35,7 @@ app.post("/login", async (req, res) => {
     const { emailId, Password } = req.body;
     const user = await User.findOne({ emailId });
     if (!user) {
-      res.send("EmailId Invalid");
+      res.send("invalid credential");
     }
     // Step 2: Compare passwords
     console.log(Password);
@@ -45,7 +45,7 @@ app.post("/login", async (req, res) => {
       res.send("Login successful!");
       // Proceed with your logic (e.g., generating a token or session)
     } else {
-      res.send("Incorrect password.");
+      res.send("invalid credential");
     }
   } catch (error) {
     res.status(400).send("Opps: " + error.message);
