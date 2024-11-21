@@ -2,25 +2,53 @@ const express = require("express");
 const connenctDB = require("./config/database");
 const app = express();
 const User = require("./model/user");
-
+const bcrypt = require("bcrypt");
 app.use(express.json());
 
 //API -- sign up
 app.post("/signup", async (req, res) => {
   try {
-    const user = new User(req.body);
-
+    //validation of incoming data
+    const { firstName, lastName, emailId, Password } = req.body;
     const emailIDExists = await User.findOne({ emailId: req.body.emailId });
-    if (emailIDExists) return res.status(400).send("Email already taken");
-
-    if (user.Password.length < 7)
-      return res.status(400).send("Password must contain 7 Charactor");
-
+    if (emailIDExists) throw new Error("email exist");
+    // password encryption
+    const passwordHash = await bcrypt.hash(Password, 10);
+    // Creating instance of model useing perticular keys
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      Password: passwordHash,
+    });
     await user.save();
     console.log(user);
     res.send("wooohoo....Profile Created ");
   } catch (error) {
-    res.status(400).send("SOME ERROR ACCOURS: " + error);
+    res.status(400).send("Opps: " + error.message);
+  }
+});
+
+// API -- Login user
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, Password } = req.body;
+    const user = await User.findOne({ emailId });
+    if (!user) {
+      res.send("EmailId Invalid");
+    }
+    // Step 2: Compare passwords
+    console.log(Password);
+    console.log(user.Password);
+    const isMatch = await bcrypt.compare(Password, user.Password);
+    if (isMatch) {
+      res.send("Login successful!");
+      // Proceed with your logic (e.g., generating a token or session)
+    } else {
+      res.send("Incorrect password.");
+    }
+  } catch (error) {
+    res.status(400).send("Opps: " + error.message);
   }
 });
 
@@ -67,27 +95,30 @@ app.delete("/user", async (req, res) => {
 });
 
 // API- update a user
-app.patch("/user", async (req, res) => {
+app.patch("/user/:userId", async (req, res) => {
   try {
-    const userId = req.body.userId;
+    const userId = req.params?.userId;
     const data = req.body;
-    console.log(userId);
-    console.log(data);
+
     const ALLOWED_UPDATES = [
       "lastName",
       "Password",
       "photoUrl",
       "about",
       "skills",
+      "firstName",
     ];
     const isUpdateAllowed = Object.keys(data).every((k) =>
       ALLOWED_UPDATES.includes(k)
     );
-    if (isUpdateAllowed) return res.status(400).send("Can Not Update fields");
-    if (data?.skills.lenght > 10)
-      return res.status(400).send("Skills Not more than 10");
+    if (!isUpdateAllowed) return res.status(400).send("Can Not Update fields");
+    /* if (data.includes.skills.length > 10)
+      return res.status(400).send("Skills Not more than 10"); */
 
-    await User.findByIdAndUpdate({ _id: userId }, data);
+    await User.findByIdAndUpdate({ _id: userId }, data, {
+      runValidators: true,
+      returnDocument: "after",
+    });
 
     res.send("user updated successfully");
   } catch (Error) {
