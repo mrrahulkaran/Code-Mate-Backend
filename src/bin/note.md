@@ -14,3 +14,7 @@ ALLOWED_UPDATES.includes(k)
 if (isUpdateAllowed) return res.status(400).send("Can Not Update fields");
 if (data?.skills.lenght > 10)
 return res.status(400).send("Skills Not more than 10");
+
+NEED TO BE FIXED SOON
+problem 1 - in profile API jwt must be provided can not handeled it properly
+problem 2 - in passwordAuth middelware not able to use it

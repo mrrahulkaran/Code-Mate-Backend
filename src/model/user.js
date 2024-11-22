@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
-    Password: {
+    password: {
       type: String,
       required: true,
       minLength: 7,

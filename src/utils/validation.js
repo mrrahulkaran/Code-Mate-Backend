@@ -1,10 +1,33 @@
 const validator = require("validator");
+
 const User = require("../model/user");
 
-const validateUser = async (req, res) => {
+const validateEmail = async (req, res, next) => {
   const emailIDExists = await User.findOne({ emailId: req.body.emailId });
-  if (emailIDExists) throw new Error("email exist");
-  if (user.Password.length < 7) throw new Error("Password must me strong");
+  if (emailIDExists) {
+    res.status(400).send("Email is already Exist");
+  } else {
+    next();
+  }
 };
 
-module.exports = { validateUser };
+const validatePassword = async (req, res, next) => {
+  console.log(req.body.password);
+
+  const { password } = req.body;
+
+  const strongPasswordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
+  strongPasswordRegex.test(password);
+  if (!validatePassword(password)) {
+    return res
+      .status(400)
+      .send(
+        "'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.'"
+      );
+  } else {
+    next();
+  }
+};
+
+module.exports = { validatePassword, validateEmail };

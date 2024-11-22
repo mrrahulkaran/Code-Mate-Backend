@@ -1,28 +1,24 @@
-const authAdmine = function (req, res, next) {
-  console.log("admin auth geting cheked");
+const jwt = require("jsonwebtoken");
+const User = require("../model/user.js");
 
-  const token = "xyz";
+const UserAuth = async (req, res, next) => {
+  try {
+    const { token } = req.cookies;
 
-  const isAdminAutherized = token === "xyz";
+    const decodetoken = await jwt.verify(token, "rahul");
 
-  if (!isAdminAutherized) {
-    res.status(401).send("unautharized Request");
-  } else {
+    const { _id } = decodetoken;
+
+    const user = await User.findById(_id);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+    res.body = { user };
     next();
+  } catch (error) {
+    res.status(400).send("Opps: " + error.message);
   }
 };
 
-const authUser = function (req, res, next) {
-  console.log("User auth geting cheked");
-
-  const token = "xyz8";
-
-  const isUserAutherized = token === "xyz";
-
-  if (!isUserAutherized) {
-    res.status(401).send("unautharized Request");
-  } else {
-    next();
-  }
-};
-module.exports = { authAdmine, authUser };
+module.exports = { authAdmine, UserAuth };
