@@ -4,105 +4,26 @@ const app = express();
 const User = require("./model/user");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
-const { UserAuth } = require("./Middelwares/auth.js");
+
 app.use(cookieParser());
 app.use(express.json());
 
-const { validatePassword, validateEmail } = require("./utils/validation.js");
 //API -- sign up
-app.post("/signup", validateEmail, async (req, res) => {
-  try {
-    //validation of incoming data and filde that need to be required for sign up
-
-    const { firstName, lastName, emailId, password } = req.body;
-
-    // password encryption -- encripted password will store in db
-    const passwordHash = await bcrypt.hash(password, 10);
-    // Creating instance of model useing perticular keys
-    const user = new User({
-      firstName,
-      lastName,
-      emailId,
-      password: passwordHash,
-    });
-    await user.save();
-    console.log(user);
-    res.send("wooohoo....Profile Created ");
-  } catch (error) {
-    res.status(400).send("Opps: " + error.message);
-  }
-});
-
 // API -- Login user
-app.post("/login", async (req, res) => {
-  try {
-    const { emailId, password } = req.body;
-    const user = await User.findOne({ emailId });
-    if (!user) throw new Error("invalid email");
-
-    // creating JWT Token and push user id as secret data
-    const token = jwt.sign({ _id: user._id }, "rahul");
-
-    // checking whether password is correct or not and....
-    // sending jwt token in a cookie attached with responce
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (isMatch) {
-      res.cookie("token", token);
-      res.send("Login successful!");
-    } else {
-      res.send("p - invalid credential");
-    }
-  } catch (error) {
-    res.status(400).send("Opps: " + error.message);
-  }
-});
-
 // API -- USER profile
+const authRouter = require("./routes/authrouter.js");
+const profileRouter = require("./routes/profilerouter");
+const requestRouter = require("./routes/requestrouter");
+const feedRouter = require("./routes/feedrouter");
 
-app.get("/profile", UserAuth, async (req, res) => {
-  try {
-    const cookie = req.cookies;
-    const { token } = cookie;
-    if (!token) {
-      throw new Error("login first");
-    }
-    const decodetoken = await jwt.verify(token, "rahul");
-
-    const userProfile = await User.findOne({ _id: decodetoken._id });
-    if (!userProfile) {
-      throw new Error("invalid user");
-    }
-    res.send(userProfile);
-  } catch (error) {
-    res.status(400).send("Opps: " + error.message);
-  }
-});
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
+app.use("/", feedRouter);
 
 // API -- feed api to see all the users in DB
-app.get("/feed", UserAuth, async (req, res) => {
-  try {
-    const allUser = await User.find();
-    res.json(allUser);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to retrieve data" });
-  }
-});
 
-// API-  find a user by Email
-app.get("/user", async (req, res) => {
-  const emailId = req.body.emailId;
-  console.log(emailId);
-
-  try {
-    const user = await User.findOne({ emailId: emailId });
-    console.log(user);
-
-    res.send(user);
-  } catch (error) {
-    res.status(404).send("User not found");
-  }
-});
+// API-  To send connection request
 
 //API -delete a user by emailId
 
