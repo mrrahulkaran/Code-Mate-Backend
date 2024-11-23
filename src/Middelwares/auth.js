@@ -19,7 +19,7 @@ const UserAuth = async (req, res, next) => {
     }
     //Attaching User Data that is login to req body
     req.user = user;
-    console.log(user);
+
     next();
   } catch (error) {
     res.status(400).send("Opps: " + error.message);
