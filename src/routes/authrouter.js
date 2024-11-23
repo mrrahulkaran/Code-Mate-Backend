@@ -10,7 +10,7 @@ authRouter.post("/signup", validateEmail, async (req, res) => {
     //validation of incoming data and filde that need to be required for sign up
 
     const { firstName, lastName, emailId, password } = req.body;
-
+    console.log(password);
     // password encryption -- encripted password will store in db
     const passwordHash = await bcrypt.hash(password, 10);
     // Creating instance of model useing perticular keys

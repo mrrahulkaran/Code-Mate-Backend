@@ -1,6 +1,7 @@
 const express = require("express");
 const profileRouter = express.Router();
 const User = require("../model/user");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { UserAuth } = require("../Middelwares/auth.js");
 
@@ -48,4 +49,28 @@ profileRouter.patch("/profile/edit", UserAuth, async (req, res) => {
     res.status(400).send("Opps: " + error.message);
   }
 });
+
+profileRouter.patch("/profile/update/password", UserAuth, async (req, res) => {
+  try {
+    const userpassword = req.body.currentpassword;
+    const isMatch = await bcrypt.compare(userpassword, req.user.password);
+    if (!isMatch) {
+      throw new Error("Current password is invalid");
+    }
+    const userId = req.user._id;
+    const password = req.body.newpassword;
+    console.log(password);
+    const updatedPassword = await bcrypt.hash(password, 10);
+    const data = { password: updatedPassword };
+    console.log(data);
+    await User.findByIdAndUpdate({ _id: userId }, data, {
+      runValidators: true,
+    });
+    console.log(updatedPassword);
+    res.send("password updated successfully");
+  } catch (error) {
+    res.status(400).send("Opps: " + error.message);
+  }
+});
+
 module.exports = profileRouter;
