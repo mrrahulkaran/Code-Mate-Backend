@@ -13,7 +13,7 @@ authRouter
 - PATCH / profile/password
 
   connectionRequestRouter
-  connection Status: intrested , ignore, accesepted , reject
+  connection Status: intrested , ignore, accesept , reject
 
 - POST /request/send/intrested/:userId
 - POST /request/send/ignored/:userId
