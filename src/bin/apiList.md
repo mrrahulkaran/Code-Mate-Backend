@@ -16,7 +16,7 @@ authRouter
   connection Status: intrested , ignore, accesepted , reject
 
 - POST /request/send/intrested/:userId
-- POST /request/send/ignore/:userId
+- POST /request/send/ignored/:userId
 - POST /request/review/accesepted/:requestId
 - POST /request/review/reject/:requestId
 
