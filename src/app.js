@@ -15,11 +15,13 @@ const authRouter = require("./routes/authrouter.js");
 const profileRouter = require("./routes/profilerouter");
 const requestRouter = require("./routes/requestrouter");
 const feedRouter = require("./routes/feedrouter");
+const userRouter = require("./routes/userrouter");
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", feedRouter);
+app.use("/", userRouter);
 
 // API -- feed api to see all the users in DB
 
