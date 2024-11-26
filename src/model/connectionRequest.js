@@ -3,6 +3,7 @@ const connectionRequestSchema = new mongoose.Schema(
   {
     senderId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // creating referance to user model
       required: true,
     },
     reciverId: {
