@@ -1,8 +1,9 @@
 const express = require("express");
 const requestRouter = express.Router();
-const ConnectionRequest = require("../model/connectionRequest");
+const ConnectionRequest = require("../model/connectionRequest.js");
 const { UserAuth } = require("../Middelwares/auth.js");
 
+//api to send connection request
 requestRouter.post(
   "/request/send/:status/:toUserId",
   UserAuth,
@@ -11,8 +12,10 @@ requestRouter.post(
       const senderId = req.user._id;
       const reciverId = req.params.toUserId;
       const status = req.params.status;
-      console.log(status);
 
+      if (senderId.toString() === reciverId.toString()) {
+        throw new Error("You can not send request to yourself");
+      }
       ALLOWED_STATUS = ["intrested", "ignored"];
       console.log(!ALLOWED_STATUS.includes(status));
 
@@ -49,6 +52,7 @@ requestRouter.post(
   }
 );
 
+//api to review connection request
 requestRouter.post(
   "/request/review/:status/:requestId",
   UserAuth,
@@ -83,5 +87,23 @@ requestRouter.post(
     }
   }
 );
+
+// Get all "intrested" connection requests received by logged in user
+requestRouter.get("/request/received", UserAuth, async (req, res) => {
+  try {
+    const userId = req.user._id; // logged-in user
+
+    // Find all requests where logged-in user is the receiver and status is "intrested"
+    const receivedRequests = await ConnectionRequest.find({
+      reciverId: userId,
+      status: "intrested",
+    }).populate("senderId", "firstName lastName email photoUrl"); // optional: populate sender info
+
+    res.json(receivedRequests);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch received requests" });
+  }
+});
 
 module.exports = requestRouter;

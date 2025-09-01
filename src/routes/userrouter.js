@@ -1,8 +1,59 @@
 const express = require("express");
 const userRouter = express.Router();
-const ConnectionRequest = require("../model/connectionRequest");
+const ConnectionRequest = require("../model/connectionRequest.js");
 const { UserAuth } = require("../Middelwares/auth.js");
+const User = require("../model/user.js");
+userRouter.use(express.json());
 
+//API -delete a user by emailId
+userRouter.delete("/user/:emailId", async (req, res) => {
+  const emailId = req.params.emailId; // ensure req.body is parsed
+  console.log(emailId); // just log the variable
+
+  const emailIDExists = await User.findOne({ emailId: emailId });
+  if (!emailIDExists) return res.status(400).send("Email Not Exist");
+
+  try {
+    await User.findOneAndDelete({ emailId: emailId });
+    res.send("User deleted successfully");
+  } catch (error) {
+    res.status(500).send("Something went wrong");
+  }
+});
+
+// API- update a user
+userRouter.patch("/user/:userId", async (req, res) => {
+  try {
+    const userId = req.params?.userId;
+    const data = req.body;
+
+    const ALLOWED_UPDATES = [
+      "lastName",
+      "Password",
+      "photoUrl",
+      "about",
+      "skills",
+      "firstName",
+    ];
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATES.includes(k)
+    );
+    if (!isUpdateAllowed) return res.status(400).send("Can Not Update fields");
+    /* if (data.includes.skills.length > 10)
+      return res.status(400).send("Skills Not more than 10"); */
+
+    await User.findByIdAndUpdate({ _id: userId }, data, {
+      runValidators: true,
+      returnDocument: "after",
+    });
+
+    res.send("user updated successfully");
+  } catch (Error) {
+    res.status(400).send("something went wrong" + Error);
+  }
+});
+
+// API - get all connection request for logged in user
 userRouter.get("/user/request", UserAuth, async (req, res) => {
   const loginuser = req.user;
   try {

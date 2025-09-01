@@ -1,16 +1,16 @@
 const express = require("express");
 const authRouter = express.Router();
-const User = require("../model/user");
+const User = require("../model/user.js");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { validatePassword, validateEmail } = require("../utils/validation.js");
+const { validateSignupData } = require("../utils/validation.js");
 
-authRouter.post("/signup", validateEmail, async (req, res) => {
+//signup api
+authRouter.post("/signup", async (req, res) => {
   try {
-    //validation of incoming data and filde that need to be required for sign up
-
+    //validation of incoming data and fields that need to be required for sign up
+    await validateSignupData(req);
+    // Destructuring the request body
     const { firstName, lastName, emailId, password } = req.body;
-    console.log(password);
     // password encryption -- encripted password will store in db
     const passwordHash = await bcrypt.hash(password, 10);
     // Creating instance of model useing perticular keys
@@ -20,26 +20,28 @@ authRouter.post("/signup", validateEmail, async (req, res) => {
       emailId,
       password: passwordHash,
     });
+    // Saving user to the database
     await user.save();
-    console.log(user);
+
     res.send("wooohoo....Profile Created ");
   } catch (error) {
     res.status(400).send("Opps: " + error.message);
   }
 });
-
+//login api
 authRouter.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
+    // finding user in db by emailId if not exist throw error
     const user = await User.findOne({ emailId });
     if (!user) throw new Error("invalid email");
 
-    // checking whether password is correct or not and....
-    // creating JWT Token and push user id as secret data
-    // sending jwt token in a cookie attached with responce
-    const isMatch = await bcrypt.compare(password, user.password);
+    // checking whether password is correct or not and....if matched then ---
+    const isMatch = await user.validatePassword(password);
     if (isMatch) {
-      const token = jwt.sign({ _id: user._id }, "rahul");
+      // creating JWT Token and push user id as secret data
+      const token = await user.getJWT();
+      // sending jwt token in a cookie attached with response
       res.cookie("token", token);
       res.send("Login successful!");
     } else {
@@ -49,7 +51,7 @@ authRouter.post("/login", async (req, res) => {
     res.status(400).send("Opps: " + error.message);
   }
 });
-
+//logout api
 authRouter.post("/logout", async (req, res) => {
   try {
     const cookie = req.cookies;

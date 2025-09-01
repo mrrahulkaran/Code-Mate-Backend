@@ -1,56 +1,48 @@
 const express = require("express");
 const profileRouter = express.Router();
-const User = require("../model/user");
+const User = require("../model/user.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { UserAuth } = require("../Middelwares/auth.js");
+const { validateEditProfileData } = require("../utils/validation.js");
 
+// api to view user profile
 profileRouter.get("/profile/view", UserAuth, async (req, res) => {
   try {
-    const cookie = req.cookies;
-    const { token } = cookie;
-
-    const decodetoken = await jwt.verify(token, "rahul");
-
-    const userProfile = await User.findOne({ _id: decodetoken._id });
-    if (!userProfile) {
-      throw new Error("invalid user");
-    }
-    res.send(userProfile);
+    // Get user information from the req.user attached by authentication middleware
+    const user = req.user;
+    res.send(user);
   } catch (error) {
     res.status(400).send("Opps: " + error.message);
   }
 });
+// api to edit user profile
 profileRouter.patch("/profile/edit", UserAuth, async (req, res) => {
   try {
-    const userId = req.user._id;
-    console.log(userId);
-
     const data = req.body;
-    const ALLOWED_UPDATES = [
-      "lastName",
-      "firstName",
-      "Password",
-      "photoUrl",
-      "about",
-      "skills",
-      "firstName",
-    ];
-    const isUpdateAllowed = Object.keys(data).every((k) =>
-      ALLOWED_UPDATES.includes(k)
-    );
-    if (!isUpdateAllowed) throw new Error("Can not update fields");
 
+    // Check allowed fields using validation function present in utils
+    if (!validateEditProfileData(data)) {
+      throw new Error("Can not update fields");
+    }
+
+    // Extra validation for skills length
+    if (data.skills && data.skills.length > 10) {
+      throw new Error("Skills not more than 10");
+    }
+
+    const userId = req.user._id;
     await User.findByIdAndUpdate({ _id: userId }, data, {
       runValidators: true,
       returnDocument: "after",
     });
-    res.send("user updated successfully");
+
+    res.send("User updated successfully");
   } catch (error) {
     res.status(400).send("Opps: " + error.message);
   }
 });
-
+// api to update user password
 profileRouter.patch("/profile/update/password", UserAuth, async (req, res) => {
   try {
     const userpassword = req.body.currentpassword;

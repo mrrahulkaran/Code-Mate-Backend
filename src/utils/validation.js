@@ -1,7 +1,44 @@
 const validator = require("validator");
 
 const User = require("../model/user");
+// validate user signup data
+const validateSignupData = async (req) => {
+  const { firstName, lastName, emailId, password } = req.body;
 
+  //Check required fields
+  if (!firstName || !lastName || !emailId || !password) {
+    throw new Error("All fields are required");
+  }
+  // Email format check
+  if (!validator.isEmail(emailId)) {
+    throw new Error("Invalid email format");
+  }
+  //  Check if email already exists in DB
+  const existingUser = await User.findOne({ emailId });
+  if (existingUser) {
+    throw new Error("Email already registered");
+  }
+  // Password strength check (customized)
+  if (!validator.isStrongPassword(password)) {
+    throw new Error(
+      "Password must be at least 8 characters long and contain at least one number and one special character."
+    );
+  }
+};
+// validate edit profile Data
+const validateEditProfileData = (data) => {
+  const ALLOWED_UPDATES = [
+    "lastName",
+    "firstName",
+    "photoUrl",
+    "about",
+    "skills",
+  ];
+  return Object.keys(data).every((k) => ALLOWED_UPDATES.includes(k));
+};
+
+//custom validations---
+// validate email
 const validateEmail = async (req, res, next) => {
   const emailIDExists = await User.findOne({ emailId: req.body.emailId });
   if (emailIDExists) {
@@ -10,7 +47,7 @@ const validateEmail = async (req, res, next) => {
     next();
   }
 };
-
+// validate password
 const validatePassword = async (req, res, next) => {
   console.log(req.body.password);
 
@@ -30,4 +67,9 @@ const validatePassword = async (req, res, next) => {
   }
 };
 
-module.exports = { validatePassword, validateEmail };
+module.exports = {
+  validatePassword,
+  validateEmail,
+  validateSignupData,
+  validateEditProfileData,
+};
