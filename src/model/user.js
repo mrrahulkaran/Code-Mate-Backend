@@ -82,6 +82,8 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+userSchema.index({ firstName: 1, lastName: 1 });
+
 // Generate JWT token for user by Using Schema method
 userSchema.methods.getJWT = async function () {
   const user = this;

@@ -2,6 +2,7 @@ const express = require("express");
 const requestRouter = express.Router();
 const ConnectionRequest = require("../model/connectionRequest.js");
 const { UserAuth } = require("../Middelwares/auth.js");
+const User = require("../model/user.js");
 
 //api to send connection request
 requestRouter.post(
@@ -16,13 +17,14 @@ requestRouter.post(
       if (senderId.toString() === reciverId.toString()) {
         throw new Error("You can not send request to yourself");
       }
+      // check valid status
       ALLOWED_STATUS = ["intrested", "ignored"];
       console.log(!ALLOWED_STATUS.includes(status));
 
       if (!ALLOWED_STATUS.includes(status)) {
         throw new Error("Status is invalid");
       }
-
+      // check whether connection request is already present or not from sender to reciver or receiver to sender
       const isconnectionpresent = await ConnectionRequest.findOne({
         $or: [
           { senderId, reciverId },
@@ -32,6 +34,11 @@ requestRouter.post(
           },
         ],
       });
+
+      const toUser = await User.findById(reciverId);
+      if (!toUser) {
+        throw new Error("User not found");
+      }
 
       if (isconnectionpresent) {
         throw new Error("Request Already exist");

@@ -53,8 +53,8 @@ userRouter.patch("/user/:userId", async (req, res) => {
   }
 });
 
-// API - get all connection request for logged in user
-userRouter.get("/user/request", UserAuth, async (req, res) => {
+// API - get all pending connection request for logged in user
+userRouter.get("/user/request/recived", UserAuth, async (req, res) => {
   const loginuser = req.user;
   try {
     const USER_SAFE_DATA = [
@@ -73,8 +73,8 @@ userRouter.get("/user/request", UserAuth, async (req, res) => {
     res.status(400).send("Opps: " + error.message);
   }
 });
-
-userRouter.get("/user/all/connections", UserAuth, async (req, res) => {
+// api to get all connections of login user
+userRouter.get("/user/connections", UserAuth, async (req, res) => {
   try {
     const loginuser = req.user;
     const USER_SAFE_DATA = [
@@ -87,8 +87,8 @@ userRouter.get("/user/all/connections", UserAuth, async (req, res) => {
 
     const connectionsReq = await ConnectionRequest.find({
       $or: [
-        { receverId: loginuser._id, status: "accsepted" },
         { senderId: loginuser._id, status: "accsepted" },
+        { reciverId: loginuser._id, status: "accsepted" },
       ],
     })
       .populate("senderId", USER_SAFE_DATA)
@@ -101,7 +101,7 @@ userRouter.get("/user/all/connections", UserAuth, async (req, res) => {
       return row.senderId;
     });
 
-    res.json({ data: data });
+    res.json({ message: "Data fetched Succsessfully ", data });
   } catch (error) {
     res.status(400).send("Opps: " + error.message);
   }
