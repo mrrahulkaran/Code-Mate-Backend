@@ -5,7 +5,7 @@ const UserAuth = async (req, res, next) => {
   try {
     const { token } = req.cookies;
     if (!token) {
-      throw new Error("login first");
+      return res.status(401).send("Access Denied: Login Required!");
     }
 
     const decodetoken = await jwt.verify(token, "rahul");
@@ -22,7 +22,7 @@ const UserAuth = async (req, res, next) => {
 
     next();
   } catch (error) {
-    res.status(400).send("Opps: " + error.message);
+    res.status(401).send("Opps: " + error.message);
   }
 };
 
