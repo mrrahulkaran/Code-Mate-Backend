@@ -32,6 +32,8 @@ userRouter.patch("/user/:userId", async (req, res) => {
       "Password",
       "photoUrl",
       "about",
+      "age",
+      "gender",
       "skills",
       "firstName",
     ];
@@ -62,13 +64,15 @@ userRouter.get("/user/request/recived", UserAuth, async (req, res) => {
       "lastName",
       "photoUrl",
       "age",
+      "gender",
+      "about",
       "skills",
     ];
     const connections = await ConnectionRequest.find({
       reciverId: loginuser._id,
       status: "intrested",
     }).populate("senderId", USER_SAFE_DATA);
-    res.json({ message: "Data fetched Succsessfully ", data: connections });
+    res.json({ data: connections });
   } catch (error) {
     res.status(400).send("Opps: " + error.message);
   }

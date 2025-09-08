@@ -32,6 +32,8 @@ const validateEditProfileData = (data) => {
     "firstName",
     "photoUrl",
     "about",
+    "age",
+    "gender",
     "skills",
   ];
   return Object.keys(data).every((k) => ALLOWED_UPDATES.includes(k));
