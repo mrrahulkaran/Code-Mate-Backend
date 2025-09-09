@@ -7,7 +7,7 @@ const ConnectionRequest = require("../model/connectionRequest.js");
 // find out all the user from the database except logged in user and his connections and $accsepted request
 feedRouter.get("/feed", UserAuth, async (req, res) => {
   try {
-    const loginuser = req.user;
+    const loggedInUser = req.user;
     const USER_SAFE_DATA = [
       "firstName",
       "lastName",
@@ -15,31 +15,33 @@ feedRouter.get("/feed", UserAuth, async (req, res) => {
       "age",
       "skills",
     ];
+    // console.log(loginuser._id.toString());
+
     const page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     if (limit > 50) {
       limit = 50;
     }
     const skip = (page - 1) * limit;
-    console.log(loginuser);
-    const connectionsReq = await ConnectionRequest.find({
-      $or: [
-        { senderId: loginuser._id, status: "accsepted" },
-        { reciverId: loginuser._id, status: "accsepted" },
-      ],
-    }).select("senderId reciverId");
 
-    const hideUserFromFeed = new Set();
-    connectionsReq.forEach((req) => {
-      hideUserFromFeed.add(req.reciverId.toString());
-      hideUserFromFeed.add(req.senderId.toString());
+    const connectionRequests = await ConnectionRequest.find({
+      $or: [{ senderId: loggedInUser._id }, { reciverId: loggedInUser._id }],
+    }).select("senderId  reciverId");
+
+    console.log(connectionRequests);
+
+    const hideUsersFromFeed = new Set();
+    connectionRequests.forEach((req) => {
+      hideUsersFromFeed.add(req.senderId.toString());
+      hideUsersFromFeed.add(req.reciverId.toString());
     });
-    console.log(hideUserFromFeed);
+
+    console.log(hideUsersFromFeed);
 
     const allUser = await User.find({
       $and: [
-        { _id: { $nin: Array.from(hideUserFromFeed) } },
-        { _id: { $ne: loginuser._id } },
+        { _id: { $nin: Array.from(hideUsersFromFeed) } },
+        { _id: { $ne: loggedInUser._id } },
       ],
     })
       .select(USER_SAFE_DATA.join(" "))
@@ -48,6 +50,8 @@ feedRouter.get("/feed", UserAuth, async (req, res) => {
 
     res.json(allUser);
   } catch (err) {
+    console.log(err);
+
     res.status(500).json({ error: "Failed to retrieve data" });
   }
 });
