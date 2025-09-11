@@ -25,7 +25,6 @@ authRouter.post("/signup", async (req, res) => {
     // Saving user to the database
 
     const saveUser = await user.save();
-    console.log({ data: saveUser });
 
     const token = await saveUser.getJWT();
     // sending jwt token in a cookie attached with response

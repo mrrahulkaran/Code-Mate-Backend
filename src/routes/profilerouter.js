@@ -52,14 +52,14 @@ profileRouter.patch("/profile/update/password", UserAuth, async (req, res) => {
     }
     const userId = req.user._id;
     const password = req.body.newpassword;
-    console.log(password);
+
     const updatedPassword = await bcrypt.hash(password, 10);
     const data = { password: updatedPassword };
-    console.log(data);
+
     await User.findByIdAndUpdate({ _id: userId }, data, {
       runValidators: true,
     });
-    console.log(updatedPassword);
+
     res.send("password updated successfully");
   } catch (error) {
     res.status(400).send("Opps: " + error.message);

@@ -8,7 +8,6 @@ userRouter.use(express.json());
 //API -delete a user by emailId
 userRouter.delete("/user/:emailId", async (req, res) => {
   const emailId = req.params.emailId; // ensure req.body is parsed
-  console.log(emailId); // just log the variable
 
   const emailIDExists = await User.findOne({ emailId: emailId });
   if (!emailIDExists) return res.status(400).send("Email Not Exist");

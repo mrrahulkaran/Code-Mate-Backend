@@ -29,15 +29,11 @@ feedRouter.get("/feed", UserAuth, async (req, res) => {
       $or: [{ senderId: loggedInUser._id }, { reciverId: loggedInUser._id }],
     }).select("senderId  reciverId");
 
-    console.log(connectionRequests);
-
     const hideUsersFromFeed = new Set();
     connectionRequests.forEach((req) => {
       hideUsersFromFeed.add(req.senderId.toString());
       hideUsersFromFeed.add(req.reciverId.toString());
     });
-
-    console.log(hideUsersFromFeed);
 
     const allUser = await User.find({
       $and: [

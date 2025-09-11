@@ -19,7 +19,6 @@ requestRouter.post(
       }
       // check valid status
       ALLOWED_STATUS = ["intrested", "ignored"];
-      console.log(!ALLOWED_STATUS.includes(status));
 
       if (!ALLOWED_STATUS.includes(status)) {
         throw new Error("Status is invalid");
