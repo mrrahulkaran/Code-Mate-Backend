@@ -70,7 +70,7 @@ const userSchema = new mongoose.Schema(
 
     about: {
       type: String,
-      default: "hi there",
+
       maxLength: 500,
     },
     skills: {

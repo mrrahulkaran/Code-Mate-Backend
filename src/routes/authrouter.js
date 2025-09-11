@@ -10,7 +10,7 @@ authRouter.post("/signup", async (req, res) => {
     //validation of incoming data and fields that need to be required for sign up
     await validateSignupData(req);
     // Destructuring the request body
-    const { firstName, lastName, emailId, password } = req.body;
+    const { firstName, lastName, emailId, password, about } = req.body;
     // password encryption -- encripted password will store in db
     const passwordHash = await bcrypt.hash(password, 10);
     // Creating instance of model useing perticular keys
@@ -19,11 +19,19 @@ authRouter.post("/signup", async (req, res) => {
       lastName,
       emailId,
       password: passwordHash,
+      about,
     });
-    // Saving user to the database
-    await user.save();
 
-    res.send("wooohoo....Profile Created ");
+    // Saving user to the database
+
+    const saveUser = await user.save();
+    console.log({ data: saveUser });
+
+    const token = await saveUser.getJWT();
+    // sending jwt token in a cookie attached with response
+    res.cookie("token", token);
+
+    res.json({ message: "wooohoo....Profile Created ", data: saveUser });
   } catch (error) {
     res.status(400).send("Opps: " + error.message);
   }

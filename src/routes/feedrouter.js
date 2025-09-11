@@ -13,6 +13,7 @@ feedRouter.get("/feed", UserAuth, async (req, res) => {
       "lastName",
       "photoUrl",
       "age",
+      "about",
       "skills",
     ];
     // console.log(loginuser._id.toString());
