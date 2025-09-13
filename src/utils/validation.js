@@ -51,8 +51,6 @@ const validateEmail = async (req, res, next) => {
 };
 // validate password
 const validatePassword = async (req, res, next) => {
-  console.log(req.body.password);
-
   const { password } = req.body;
 
   const strongPasswordRegex =

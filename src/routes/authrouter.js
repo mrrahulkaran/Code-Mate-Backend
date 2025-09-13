@@ -40,7 +40,6 @@ authRouter.post("/signup", async (req, res) => {
         " UserEmail  -" +
         saveUser.emailId
     );
-    console.log(emailRes);
 
     res.json({ message: "wooohoo....Profile Created ", data: saveUser });
   } catch (error) {

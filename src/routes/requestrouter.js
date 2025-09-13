@@ -48,9 +48,6 @@ requestRouter.post(
         status,
       });
 
-      console.log("AWS_ACCESS_KEY_ID:", process.env.AWS_ACCESS_KEY_ID);
-      console.log("AWS_SECRET_ACCESS_KEY:", process.env.AWS_SECRET_ACCESS_KEY);
-
       await connection.save();
 
       res.send(" Send a connection Request");
