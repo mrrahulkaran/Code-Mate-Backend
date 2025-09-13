@@ -1,7 +1,9 @@
 const express = require("express");
 require("dotenv").config();
-const connenctDB = require("./config/database");
+
+const connectDB = require("./config/database");
 const app = express();
+
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
@@ -21,13 +23,17 @@ app.use("/", requestRouter);
 app.use("/", feedRouter);
 app.use("/", userRouter);
 
-connenctDB()
+// Verify that MONGODB_URI is loaded
+console.log("MongoDB URI:", process.env.MONGODB_URI);
+
+connectDB()
   .then(() => {
-    console.log("database connection established");
+    console.log("Database connection established");
     app.listen(3000, () => {
-      console.log("server is running on 3000 port");
+      console.log("Server is running on port 3000");
     });
   })
   .catch((err) => {
-    console.error("database connection error", err);
+    console.error("Database connection error:", err);
+    process.exit(1); // Exit on DB failure to prevent app from running without DB
   });
