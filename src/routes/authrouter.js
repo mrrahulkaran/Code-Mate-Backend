@@ -30,7 +30,7 @@ authRouter.post("/signup", async (req, res) => {
     const token = await saveUser.getJWT();
     // sending jwt token in a cookie attached with response
     res.cookie("token", token);
-    const emailRes = await sendEmail.run(
+    await sendEmail.run(
       "New User Registerd in Your Application",
       "User Name  -" +
         saveUser.firstName +

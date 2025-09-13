@@ -5,22 +5,29 @@ const { UserAuth } = require("../Middelwares/auth.js");
 const User = require("../model/user.js");
 userRouter.use(express.json());
 
-//API -delete a user by emailId
+// API - delete a user by emailId + cascade delete connection requests
 userRouter.delete("/user/:emailId", async (req, res) => {
-  const emailId = req.params.emailId; // ensure req.body is parsed
+  const emailId = req.params.emailId;
 
   const emailIDExists = await User.findOne({ emailId: emailId });
   if (!emailIDExists) return res.status(400).send("Email Not Exist");
 
   try {
+    // Delete user
     await User.findOneAndDelete({ emailId: emailId });
+
+    // Delete connection requests referencing that user
+    await ConnectionRequest.deleteMany({
+      $or: [{ senderId: emailIDExists._id }, { reciverId: emailIDExists._id }],
+    });
+
     res.send("User deleted successfully");
   } catch (error) {
     res.status(500).send("Something went wrong");
   }
 });
 
-// API- update a user
+// API - update a user
 userRouter.patch("/user/:userId", async (req, res) => {
   try {
     const userId = req.params?.userId;
@@ -40,8 +47,6 @@ userRouter.patch("/user/:userId", async (req, res) => {
       ALLOWED_UPDATES.includes(k)
     );
     if (!isUpdateAllowed) return res.status(400).send("Can Not Update fields");
-    /* if (data.includes.skills.length > 10)
-      return res.status(400).send("Skills Not more than 10"); */
 
     await User.findByIdAndUpdate({ _id: userId }, data, {
       runValidators: true,
@@ -54,7 +59,7 @@ userRouter.patch("/user/:userId", async (req, res) => {
   }
 });
 
-// API - get all pending connection request for logged in user
+// API - get all pending connection requests received by logged-in user (filtered)
 userRouter.get("/user/request/recived", UserAuth, async (req, res) => {
   const loginuser = req.user;
   try {
@@ -71,12 +76,19 @@ userRouter.get("/user/request/recived", UserAuth, async (req, res) => {
       reciverId: loginuser._id,
       status: "intrested",
     }).populate("senderId", USER_SAFE_DATA);
-    res.json({ data: connections });
+
+    // Filter out requests with null senderId
+    const filteredConnections = connections.filter(
+      (conn) => conn.senderId !== null
+    );
+
+    res.json({ data: filteredConnections });
   } catch (error) {
     res.status(400).send("Opps: " + error.message);
   }
 });
-// api to get all connections of login user
+
+// API - get all accepted connections of logged-in user (filtered)
 userRouter.get("/user/connections", UserAuth, async (req, res) => {
   try {
     const loginuser = req.user;
@@ -97,14 +109,19 @@ userRouter.get("/user/connections", UserAuth, async (req, res) => {
       .populate("senderId", USER_SAFE_DATA)
       .populate("reciverId", USER_SAFE_DATA);
 
-    const data = connectionsReq.map((row) => {
+    // Filter out records where senderId or reciverId is null
+    const filteredConnectionsReq = connectionsReq.filter(
+      (row) => row.senderId !== null && row.reciverId !== null
+    );
+
+    const data = filteredConnectionsReq.map((row) => {
       if (row.senderId._id.toString() === loginuser._id.toString()) {
-        return row.receverId;
+        return row.reciverId;
       }
       return row.senderId;
     });
 
-    res.json({ message: "Data fetched Succsessfully ", data });
+    res.json({ message: "Data fetched Successfully", data });
   } catch (error) {
     res.status(400).send("Opps: " + error.message);
   }

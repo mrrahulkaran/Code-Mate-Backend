@@ -48,9 +48,9 @@ requestRouter.post(
         status,
       });
 
-      await connection.save();
+      const savedConnection = await connection.save();
 
-      res.send(" Send a connection Request");
+      res.send(" Send a connection Request" + savedConnection);
     } catch (error) {
       res.status(400).send("Opps: " + error.message);
     }
