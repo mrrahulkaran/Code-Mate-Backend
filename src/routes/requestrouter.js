@@ -3,7 +3,6 @@ const requestRouter = express.Router();
 const ConnectionRequest = require("../model/connectionRequest.js");
 const { UserAuth } = require("../Middelwares/auth.js");
 const User = require("../model/user.js");
-
 //api to send connection request
 requestRouter.post(
   "/request/send/:status/:toUserId",
@@ -48,6 +47,9 @@ requestRouter.post(
         reciverId,
         status,
       });
+
+      console.log("AWS_ACCESS_KEY_ID:", process.env.AWS_ACCESS_KEY_ID);
+      console.log("AWS_SECRET_ACCESS_KEY:", process.env.AWS_SECRET_ACCESS_KEY);
 
       await connection.save();
 

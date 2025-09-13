@@ -3,6 +3,7 @@ const authRouter = express.Router();
 const User = require("../model/user.js");
 const bcrypt = require("bcrypt");
 const { validateSignupData } = require("../utils/validation.js");
+const sendEmail = require("../utils/sendEmail");
 
 //signup api
 authRouter.post("/signup", async (req, res) => {
@@ -29,6 +30,17 @@ authRouter.post("/signup", async (req, res) => {
     const token = await saveUser.getJWT();
     // sending jwt token in a cookie attached with response
     res.cookie("token", token);
+    const emailRes = await sendEmail.run(
+      "New User Registerd in Your Application",
+      "User Name  -" +
+        saveUser.firstName +
+        "  " +
+        saveUser.lastName +
+        "  ," +
+        " UserEmail  -" +
+        saveUser.emailId
+    );
+    console.log(emailRes);
 
     res.json({ message: "wooohoo....Profile Created ", data: saveUser });
   } catch (error) {
