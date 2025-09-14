@@ -8,7 +8,7 @@ const UserAuth = async (req, res, next) => {
       return res.status(401).send("Access Denied: Login Required!");
     }
 
-    const decodetoken = await jwt.verify(token, "rahul");
+    const decodetoken = await jwt.verify(token, process.env.JWT_SECRET);
 
     const { _id } = decodetoken;
 
