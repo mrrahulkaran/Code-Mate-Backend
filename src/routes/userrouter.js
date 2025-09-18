@@ -127,4 +127,18 @@ userRouter.get("/user/connections", UserAuth, async (req, res) => {
   }
 });
 
+userRouter.get("/users/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await User.findById(userId, "firstName lastName email"); // select needed fields
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error("Error fetching user", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = userRouter;
